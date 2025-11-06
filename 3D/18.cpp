@@ -223,7 +223,6 @@ void onKey(unsigned char key, int x, int y) {
 				objects.push_back(&prism);
 				objects.push_back(&frustum);
 			}
-			cout << change << endl;
 			break;
 		case 's': 
 			for (Shape* s : objects) {

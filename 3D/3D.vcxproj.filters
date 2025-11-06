@@ -21,6 +21,9 @@
     <None Include="fragment.glsl">
       <Filter>소스 파일</Filter>
     </None>
+    <None Include="19.h">
+      <Filter>헤더 파일</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="14.h">
@@ -56,6 +59,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="18.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="19.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
