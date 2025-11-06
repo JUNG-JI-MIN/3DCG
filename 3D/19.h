@@ -47,10 +47,171 @@ vector<Vertex> create_circle(float r = 1.0f) {
     }
     return circle_vertices;
 }
+vector<Vertex> create_sphere(float r = 1.0f, int kind=0) {
+    vector<Vertex> circle_vertices;
+    glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float uangle = 0.0f,vangle = 0.0f, d_angle = 3.0f;
+    while (vangle <= 360) {
+        uangle = 0.0f;
+        while (uangle <= 360) {
+            float u = glm::radians(uangle);
+            float v = glm::radians(vangle);
+            float x = r * cos(u) * sin(v);
+            float y = r * cos(v);
+            float z = r * sin(u) * sin(v);
+            if (kind == 0) {
+                color = { uangle / 360, 1.0f, 1.0f, 1.0f };
+            }
+            else if (kind == 1) {
+                color = { 1.0f, uangle / 360, 1.0f, 1.0f };
+            }
+            else if (kind == 2) {
+                color = {  1.0f, 1.0f,uangle / 360, 1.0f };
+            }
+            circle_vertices.push_back({ glm::vec3(x, y, z), glm::vec4(color) });
+            uangle += d_angle;
+        }
+        vangle += d_angle;
+    }
+    return circle_vertices;
+}
+vector<unsigned int> create_sphere_index(int slices = 120) { // 여기서는 360 / 3으로 진행함 그러므로 120이다. 면의 개수는 level-1이다.
+    vector<unsigned int> sphere_index;
 
+    // slices: 경도 분할 수 (j의 최대치)
+    // stacks: 위도 분할 수 (i의 최대치)
+    const int SLICES = slices;
+    const int STACKS = (int)(SLICES / 2.0f); // 360/3=120, 180/3=60. level이 120이면 stacks는 60.
+
+    // 한 층(스택) 당 정점 개수
+    const int VERTICES_PER_STACK = SLICES + 1;
+
+    // i (스택 인덱스)는 0부터 STACKS-1까지 반복
+    for (int i = 0; i < STACKS; ++i) {
+        // j (슬라이스 인덱스)는 0부터 SLICES-1까지 반복
+        for (int j = 0; j < SLICES; ++j) {
+
+            // p1: i번째 스택, j번째 슬라이스
+            unsigned int p1 = i * VERTICES_PER_STACK + j;
+            // p2: i번째 스택, j+1번째 슬라이스
+            unsigned int p2 = p1 + 1;
+            // p3: i+1번째 스택, j번째 슬라이스
+            unsigned int p3 = (i + 1) * VERTICES_PER_STACK + j;
+            // p4: i+1번째 스택, j+1번째 슬라이스
+            unsigned int p4 = p3 + 1;
+
+            // 삼각형 1: (p1, p3, p2)
+            sphere_index.push_back(p1);
+            sphere_index.push_back(p3);
+            sphere_index.push_back(p2);
+
+            // 삼각형 2: (p2, p3, p4)
+            sphere_index.push_back(p2);
+            sphere_index.push_back(p3);
+            sphere_index.push_back(p4);
+        }
+    }
+    return sphere_index;
+}
+
+float random(float min = 0, float max=3) {
+    if (max == 0) return 0;
+    int num = rand() % (int)max + min;
+    float x = (float)num / max;
+    return (float)num + x;
+}
 class Shape {
 public:
-    glm::mat4 getModelMatrix();
+    GLuint vao; // Vertex Array Object
+    GLuint vbo; // Vertex Buffer Object
+    GLuint ebo; // Element Buffer Object
+    vector<Vertex> vertices; // 버텍스 배열
+    vector <unsigned int> indices; // 인덱스
+    glm::vec3 move_xyz = { 0.0f,0.0f ,0.0f };
+    glm::vec3 multy = { 1.0f, 1.0f, 1.0f };
+    glm::quat ro = glm::quat(1, 0, 0, 0);
+    // 이코드 에서 사용할거
+    float d_angle=3.0f;
+    float gong_angle;
+    // 이 코드에서 사용할거
+    Shape(const vector<Vertex>& ver, const vector<unsigned int>& ind)
+        :vertices(ver), indices(ind) {
+    }
+    void reset_state()
+    {
+        move_xyz = { 0.0f,0.0f ,0.0f };
+        ro = glm::quat(1, 0, 0, 0);
+    }
+    void ja_addRotation(float dAngleX, float dAngleY, float dAngleZ)
+    {
+        glm::quat qx = glm::angleAxis(glm::radians(dAngleX), glm::vec3(1, 0, 0));
+        glm::quat qy = glm::angleAxis(glm::radians(dAngleY), glm::vec3(0, 1, 0));
+        glm::quat qz = glm::angleAxis(glm::radians(dAngleZ), glm::vec3(0, 0, 1));
+        ro = glm::normalize(qz * qy * qx * ro);
+    }
+    void add_XYZ(float dx, float dy, float dz)
+    {
+        move_xyz.x += dx;
+        move_xyz.y += dy;
+        move_xyz.z += dz;
+    }
+    glm::mat4 getModelMatrix()
+    {
+        //스케일링 회전 이동
+        glm::mat4 model = glm::mat4(1.0f); 
+        //glm::vec4 asd = { move_xyz,1.0f };
+        //glm::vec4 transformed_position = model * asd;
+        model = glm::scale(model, multy);
+        model = model * glm::mat4_cast(ro); // 공전
+        model = glm::translate(model, move_xyz);
+        return model;
+    }
+    void Init()
+    {
+        std::cout << "Init() called: vertices=" << vertices.size()
+            << ", indices=" << indices.size() << std::endl;
+
+        if (vertices.empty() || indices.empty()) {
+            std::cerr << "ERROR: Empty vertex or index data!" << std::endl;
+            return;
+        }
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+        // 정점 속성 설정 (position, color 등)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+        glEnableVertexAttribArray(1);
+
+        glBindVertexArray(0);
+    }
+    void Update() {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+    }
+
+    void Draw()
+    {
+        glBindVertexArray(vao);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    }
+    void Delete()
+    {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ebo);
+    }
 };
 class Line {
 public:
@@ -143,9 +304,10 @@ public:
     }
 };
 void result_matrix(Camera camera, Shape shape) {
+    glm::mat4 uModel = shape.getModelMatrix();
     glm::mat4 uView = camera.View_matrix_updata();
     glm::mat4 uProj = camera.Projection_matrix_updata();
-    glm::mat4 modelMatrix = uProj * uView;
+    glm::mat4 modelMatrix = uProj * uView * uModel;
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
@@ -158,5 +320,18 @@ void result_line_matrix(Camera camera, Line line) {
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 Camera camera({ 0.0f,1.0f,5.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
-vector<Line*> line;
+vector<Line*> lines;
+vector<Shape*> shapes;
+Shape c4(create_sphere(0.5f,0), create_sphere_index());
 
+Shape a1(create_sphere(0.25f,1), create_sphere_index());
+Shape a2(create_sphere(0.25f, 1), create_sphere_index());
+Shape a3(create_sphere(0.25f, 1), create_sphere_index());
+
+Shape b1(create_sphere(0.1f, 2), create_sphere_index());
+Shape b2(create_sphere(0.1f, 2), create_sphere_index());
+Shape b3(create_sphere(0.1f, 2), create_sphere_index());
+
+Line c1(create_circle(1.5f), 45);
+Line c2(create_circle(1.5f), -45);
+Line c3(create_circle(1.5f));

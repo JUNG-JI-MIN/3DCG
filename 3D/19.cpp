@@ -19,10 +19,11 @@ char* filetobuf(const char* file)
 }
 // 타이머 함수 구현
 void TimerFunction(int value) {
-	
+	for (Shape* s : shapes) {
+		s->ja_addRotation(0,s->d_angle,0);
+	}
 	glutPostRedisplay();  // 화면 다시 그리기
 	glutTimerFunc(16, TimerFunction, 1);  // 다음 타이머 설정
-
 }
 void onKey(unsigned char key, int x, int y) {
 	
@@ -56,14 +57,27 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	make_vertexShaders(); //--- 버텍스 세이더 만들기
 	make_fragmentShaders(); //--- 프래그먼트 세이더 만들기
 
-	Line c1(create_circle(1.5f), 45);
-	Line c2(create_circle(1.5f), -45);
-	Line c3(create_circle(1.5f));
-	line.push_back(&c1);
-	line.push_back(&c2);
-	line.push_back(&c3);
-	for (Line* l : line) {
+	lines.push_back(&c1);
+	lines.push_back(&c2);
+	lines.push_back(&c3);
+
+	shapes.push_back(&c4);
+
+	shapes.push_back(&a1);
+	shapes.push_back(&a2);
+	shapes.push_back(&a3);
+
+	shapes.push_back(&b1);
+	shapes.push_back(&b2);
+	shapes.push_back(&b3);
+
+	for (Line* l : lines) {
 		l->Init();
+	}
+	for (Shape* s : shapes) {
+		s->Init();
+		s->d_angle = random();
+		
 	}
 
 	shaderProgramID = make_shaderProgram(); //--- 세이더 프로그램 만들기
@@ -150,12 +164,16 @@ GLvoid drawScene() {
 	// 뒷면 제거 설정
 	glCullFace(GL_BACK);        // 뒷면을 제거
 
-	for (Line* l : line) {
+	for (Line* l : lines) {
 		result_line_matrix(camera, *l);
 		l->Update();
 		l->Draw();
 	}
-
+	for (Shape* s : shapes) {
+		result_matrix(camera, *s);
+		s->Update();
+		s->Draw();
+	}
 	glutSwapBuffers();
 }
 //--- 다시그리기 콜백 함수
