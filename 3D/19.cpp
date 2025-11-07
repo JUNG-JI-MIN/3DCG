@@ -20,14 +20,94 @@ char* filetobuf(const char* file)
 // 타이머 함수 구현
 void TimerFunction(int value) {
 	for (Shape* s : shapes) {
-		s->ja_addRotation(0,s->d_angle,0);
+		s->ja_addRotation(0, s->d_angle, 0);
 	}
+	for (Shape* s : shapes) {
+		if (s == &c4) continue;
+		float x = ring * 1.5f * cos(s->real_gong_angle);
+		float z = ring * 1.5f * sin(s->real_gong_angle);
+		if (s == &b1 || s == &b2 || s == &b3) {
+			float b_x = ring * 0.5f * cos(s->real_gong_angle);
+			float b_z = ring * 0.5f * sin(s->real_gong_angle);
+			s->B_xyz = { b_x,0,b_z };
+		}
+		s->real_gong_angle += s->d_real_gong_angle;
+		if (s->real_gong_angle >= 360) s->real_gong_angle = 0;
+		s->set_XYZ(x, 0, z);
+	}
+	if (zrotate[0]) {
+		for (Shape* s : shapes) {
+			s->gong_angle += 0.3f;
+		}
+		for (Line* l : lines) {
+			l->rotate_angle += 0.3f;
+		}
+	}
+	else if (zrotate[1]) {
+		for (Shape* s : shapes) {
+			s->gong_angle -= 0.3f;
+		}
+		for (Line* l : lines) {
+			l->rotate_angle -= 0.3f;
+		}
+	}
+	// shapes와 lines 동기화
+	d1.xyz = a1.move_xyz;
+	d2.xyz = a2.move_xyz;
+	d3.xyz = a3.move_xyz;
+
 	glutPostRedisplay();  // 화면 다시 그리기
 	glutTimerFunc(16, TimerFunction, 1);  // 다음 타이머 설정
 }
+void moving(float dx, float dy, float dz) {
+	for (Shape* s : shapes) {
+		s->add_XYZ(dx, dy, dz);
+	}
+	for (Line* l : lines) {
+		l->add_XYZ(dx, dy, dz);
+	}
+}
 void onKey(unsigned char key, int x, int y) {
-	
-	
+	switch (key)
+	{
+	case 'p': trand = false; break;
+	case 'P': trand = true; break;
+	case 'm': wi = true; break;
+	case 'M': wi = false;  break;
+	case 'r':
+	case 'R':
+		for (Shape* s : shapes) {
+			s->reset_state();
+			if (s == &c4) c4.move_xyz.x = 0.0f;
+		}
+		ring = 1;
+		trand = true;
+		wi = false;
+		zrotate[0] = false;
+		zrotate[1] = false;
+		break;
+	case 'y': ring += 0.3f; break;
+	case 'Y': ring -= 0.3f; break;
+	case 'z':
+		zrotate[0] = true;
+		zrotate[1] = false;
+		break;
+	case 'Z': 
+		zrotate[1] = true;
+		zrotate[0] = false;
+		break;
+
+
+	case 'w': moving(0.0f, 0.5f, 0.0f); break;
+	case 'a': moving(-0.5f, 0.0f, 0.0f); break;
+	case 's': moving(0.0f, -0.5f, 0.0f); break;
+	case 'd': moving(0.5f, 0.0f, 0.0f); break;
+
+	case '+': moving(0.0f, 0.0f, 0.5f); break;
+	case '-': moving(0.0f, 0.0f, -0.5f); break;
+
+	case 'q': exit(1);
+	}
 	glutPostRedisplay();
 }
 void onSpecialKey(int key, int x, int y) {
@@ -61,6 +141,10 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	lines.push_back(&c2);
 	lines.push_back(&c3);
 
+	lines.push_back(&d1);
+	lines.push_back(&d2);
+	lines.push_back(&d3);
+
 	shapes.push_back(&c4);
 
 	shapes.push_back(&a1);
@@ -76,9 +160,13 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	}
 	for (Shape* s : shapes) {
 		s->Init();
-		s->d_angle = random();
-		
+		s->d_angle = random(0.0f,3.0f);
+		if (s == &a1|| s== & a2|| s== & a3)
+		s->d_real_gong_angle = random(0.0f,0.03f);
 	}
+	b1.d_real_gong_angle = a1.d_real_gong_angle;
+	b2.d_real_gong_angle = a2.d_real_gong_angle;
+	b3.d_real_gong_angle = a3.d_real_gong_angle;
 
 	shaderProgramID = make_shaderProgram(); //--- 세이더 프로그램 만들기
 	glutDisplayFunc(drawScene); //--- 출력 콜백 함수

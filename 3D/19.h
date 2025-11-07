@@ -34,6 +34,8 @@ struct Vertex {
 궤도는 원형이고 궤도의 크기는 스케일링, 반지름이 r이라 할떄 스케일링이 s라면 궤도의 반지름은 r*s이다.
 별의 위치는 (0,0,0)이고 행성의 초기 위치는 (r*s,0,0)이다.
 */
+float ring = 1;
+bool trand = true, wi = false, zrotate[2] = { false };
 vector<Vertex> create_circle(float r = 1.0f) {
 	vector<Vertex> circle_vertices;
     float angle = 0.0f, d_angle =3.0f;
@@ -113,13 +115,16 @@ vector<unsigned int> create_sphere_index(int slices = 120) { // 여기서는 360 / 3
     }
     return sphere_index;
 }
-
-float random(float min = 0, float max=3) {
-    if (max == 0) return 0;
-    int num = rand() % (int)max + min;
-    float x = (float)num / max;
-    return (float)num + x;
+//여기까지가 이 코드에서만 필요한거
+float random(float min = 0.0f, float max = 1.0f) {
+    // 0.0 ~ 1.0 사이의 정규화된 난수 생성
+    float randomValue = (float)rand() / (float)RAND_MAX;
+    // min ~ max 범위로 스케일링
+    float result = min + randomValue * (max - min);
+    if (result == 0) result = 0.001;
+    return result;
 }
+
 class Shape {
 public:
     GLuint vao; // Vertex Array Object
@@ -132,15 +137,24 @@ public:
     glm::quat ro = glm::quat(1, 0, 0, 0);
     // 이코드 에서 사용할거
     float d_angle=3.0f;
-    float gong_angle;
+    float gong_angle; // 자전
+    float org_gong_angle;
+    float real_gong_angle = 0.0f ,d_real_gong_angle; // 공전
+    glm::vec3 B_xyz = { 0.0f,0.0f ,0.0f }; // 공전의 공전
+    glm::vec3 plus_xyz = { 0.0f,0.0f ,0.0f };
+    int dur; // 0은 별, 1은 행성, 2는 위성
     // 이 코드에서 사용할거
-    Shape(const vector<Vertex>& ver, const vector<unsigned int>& ind)
-        :vertices(ver), indices(ind) {
+    Shape(const vector<Vertex>& ver, const vector<unsigned int>& ind,glm::vec3 a, float angle,int durgkf)
+        :vertices(ver), indices(ind), move_xyz(a), gong_angle(angle), dur(durgkf),org_gong_angle(angle) {
     }
     void reset_state()
     {
-        move_xyz = { 0.0f,0.0f ,0.0f };
+        move_xyz = { 1.5f,0.0f ,0.0f };
         ro = glm::quat(1, 0, 0, 0);
+        gong_angle = org_gong_angle;
+        real_gong_angle = 0.0f;
+        B_xyz = { 0.0f,0.0f ,0.0f };
+        plus_xyz = { 0.0f,0.0f ,0.0f };
     }
     void ja_addRotation(float dAngleX, float dAngleY, float dAngleZ)
     {
@@ -151,9 +165,15 @@ public:
     }
     void add_XYZ(float dx, float dy, float dz)
     {
-        move_xyz.x += dx;
-        move_xyz.y += dy;
-        move_xyz.z += dz;
+        plus_xyz.x += dx;
+        plus_xyz.y += dy;
+        plus_xyz.z += dz;
+    }
+    void set_XYZ(float dx, float dy, float dz)
+    {
+        move_xyz.x = dx;
+        move_xyz.y = dy;
+        move_xyz.z = dz;
     }
     glm::mat4 getModelMatrix()
     {
@@ -161,9 +181,12 @@ public:
         glm::mat4 model = glm::mat4(1.0f); 
         //glm::vec4 asd = { move_xyz,1.0f };
         //glm::vec4 transformed_position = model * asd;
+        model = glm::translate(model, plus_xyz); // 이동하는 거
+        model = glm::rotate(model, glm::radians(gong_angle), { 0.0f,0.0f, 1.0f }); // 축 기울이기
+        model = glm::translate(model, move_xyz); // 이동하는 거
+        model = model * glm::mat4_cast(ro); // 자전
+        model = glm::translate(model, B_xyz); // 이동하는 거
         model = glm::scale(model, multy);
-        model = model * glm::mat4_cast(ro); // 공전
-        model = glm::translate(model, move_xyz);
         return model;
     }
     void Init()
@@ -203,7 +226,8 @@ public:
     void Draw()
     {
         glBindVertexArray(vao);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (wi) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     }
     void Delete()
@@ -221,16 +245,41 @@ public:
     float rotate_angle = 0.0f;
     glm::vec3 xyz = { 0.0f,0.0f ,0.0f };
     glm::vec3 multy = { 1.0f, 1.0f, 1.0f };
-    Line(vector<Vertex> ver,float angle = 0.0f) {
+    glm::vec3 plus_xyz = { 0.0f,0.0f ,0.0f };
+    int dur;
+    float real_gong_angle =0.0f;
+    Line(vector<Vertex> ver,float angle = 0.0f,int durgkf = 0) {
 		vertices = ver;
 		rotate_angle = angle;
+        if (durgkf == 1) xyz = { 1.5f,0.0f ,0.0f };
+        dur = durgkf;
+    }
+    void set_XYZ(float dx, float dy, float dz)
+    {
+        xyz.x = dx;
+        xyz.y = dy;
+        xyz.z = dz;
+    }
+    void reset() {
+        plus_xyz = { 0.0f,0.0f ,0.0f };
+    }
+    void add_XYZ(float dx, float dy, float dz)
+    {
+        plus_xyz.x += dx;
+        plus_xyz.y += dy;
+        plus_xyz.z += dz;
     }
     glm::mat4 getModelMatrix()
     {
+        float r = glm::radians(rotate_angle);
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, plus_xyz);
+        if (dur == 1) {
+            model = glm::rotate(model, glm::radians(rotate_angle), { 0.0f,0.0f, 1.0f });
+        }
         model = glm::translate(model, xyz);
-        model = glm::rotate(model, glm::radians(rotate_angle), {0.0f,0.0f, 1.0f});
-        model = glm::scale(model, multy);
+        if (dur ==0) model = glm::rotate(model, r, {0.0f,0.0f, 1.0f});
+        model = glm::scale(model, {ring,ring,ring});
         return model;
     }
     void Init()
@@ -277,6 +326,7 @@ public:
     float aspect; // 종횡비 아직 w와 h가 없기 때문에 계산 불가
     float n = 0.1f; // near
     float f = 100.0f; // far
+    float orthoScale = 2.5f; // 직각 투영 범위
     Camera(glm::vec3 pos, glm::vec3 tar, glm::vec3 u)
         : position(pos), target(tar), up(u) {
 
@@ -285,12 +335,12 @@ public:
     glm::mat4 getViewMatrix() {
         return glm::lookAt(position, target, up);
     }
-    glm::mat4 View_matrix_updata() {
+    glm::mat4 View_matrix_update() {
         glm::mat4 viewMatrix = glm::mat4(1.0f);
         viewMatrix = glm::lookAt(position, target, up);
         return viewMatrix;
     }
-    glm::mat4 Projection_matrix_updata() {
+    glm::mat4 Projection_matrix_update() {
         aspect = (float)width / (float)height;
         glm::mat4 projectionMatrix = glm::mat4(1.0f);
         if (aspect <= 0.0f) {
@@ -302,36 +352,54 @@ public:
             n, f);// near, far
         return projectionMatrix;
     }
+    glm::mat4 Orthographic_matrix_update() {
+        aspect = (float)width / (float)height;
+        if (aspect <= 0.0f) aspect = 1.0f;
+        float scale = orthoScale;
+        return glm::ortho(-scale * aspect, scale * aspect,
+            -scale, scale, n, f);
+    }
 };
 void result_matrix(Camera camera, Shape shape) {
+    glm::mat4 modelMatrix;
+    glm::mat4 uProj;
     glm::mat4 uModel = shape.getModelMatrix();
-    glm::mat4 uView = camera.View_matrix_updata();
-    glm::mat4 uProj = camera.Projection_matrix_updata();
-    glm::mat4 modelMatrix = uProj * uView * uModel;
+    glm::mat4 uView = camera.View_matrix_update();
+    if (trand) uProj = camera.Projection_matrix_update();
+    else uProj = camera.Orthographic_matrix_update();
+    modelMatrix = uProj * uView * uModel;
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 void result_line_matrix(Camera camera, Line line) {
+    glm::mat4 modelMatrix;
+    glm::mat4 uProj;
 	glm::mat4 uModel = line.getModelMatrix();
-    glm::mat4 uView = camera.View_matrix_updata();
-    glm::mat4 uProj = camera.Projection_matrix_updata();
-    glm::mat4 modelMatrix = uProj * uView * uModel;
+    glm::mat4 uView = camera.View_matrix_update();
+    if (trand) uProj = camera.Projection_matrix_update();
+    else uProj = camera.Orthographic_matrix_update();
+    modelMatrix = uProj * uView * uModel;
+    
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 Camera camera({ 0.0f,1.0f,5.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
 vector<Line*> lines;
 vector<Shape*> shapes;
-Shape c4(create_sphere(0.5f,0), create_sphere_index());
+Shape c4(create_sphere(0.5f,0), create_sphere_index(), glm::vec3{ 0.0f,0.0f,0.0f },0,0);
 
-Shape a1(create_sphere(0.25f,1), create_sphere_index());
-Shape a2(create_sphere(0.25f, 1), create_sphere_index());
-Shape a3(create_sphere(0.25f, 1), create_sphere_index());
+Shape a1(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{1.5f,0.0f,0.0f},45,1);
+Shape a2(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f },-45, 1);
+Shape a3(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f },0, 1);
 
-Shape b1(create_sphere(0.1f, 2), create_sphere_index());
-Shape b2(create_sphere(0.1f, 2), create_sphere_index());
-Shape b3(create_sphere(0.1f, 2), create_sphere_index());
+Shape b1(create_sphere(0.1f, 2), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f },45, 2);
+Shape b2(create_sphere(0.1f, 2), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f },-45, 2);
+Shape b3(create_sphere(0.1f, 2), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f },0, 2);
 
-Line c1(create_circle(1.5f), 45);
-Line c2(create_circle(1.5f), -45);
-Line c3(create_circle(1.5f));
+Line c1(create_circle(1.5f), 45,0);
+Line c2(create_circle(1.5f), -45, 0);
+Line c3(create_circle(1.5f), 0,0);
+
+Line d1(create_circle(0.5f), 45, 1);
+Line d2(create_circle(0.5f), -45, 1);
+Line d3(create_circle(0.5f), 0,1);
