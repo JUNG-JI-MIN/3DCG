@@ -138,6 +138,8 @@
     <ClInclude Include="16.h" />
     <ClInclude Include="17.h" />
     <ClInclude Include="18.h" />
+    <ClInclude Include="20.h" />
+    <ClInclude Include="tank_model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\zjavbxjrmfovlrtm\zjavbxjrmfovlrtm\1-10.cpp">
@@ -158,7 +160,13 @@
     <ClCompile Include="18.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="19.cpp" />
+    <ClCompile Include="19.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="20.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

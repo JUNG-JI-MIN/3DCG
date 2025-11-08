@@ -6,9 +6,8 @@ out vec4 out_Color;                   // 프래그먼트 셰이더로 색상 전달
 uniform mat4 u;   // 최종 행렬
 
 
-
 void main()
 {
-    gl_Position =  u * vec4(inPos, 1.0);
+    gl_Position =  u  * vec4(inPos, 1.0);
     out_Color = inColor;
 }
