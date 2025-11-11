@@ -317,9 +317,7 @@ void TimerFunction(int value) {
     }
 
     if (tro) tank.y_rotate();
-    if (lro) {
-        tank.Top_trace();
-    }
+    if (lro) tank.Top_trace();
     if (gro) tank.posin_Y();
     if (pro) tank.flag_X();
     if (yro) camera.camera_PY();
