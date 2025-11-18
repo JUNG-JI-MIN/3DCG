@@ -44,11 +44,14 @@
     <ClInclude Include="18.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="tank_model.h">
+      <Filter>헤더 파일\20</Filter>
+    </ClInclude>
     <ClInclude Include="20.h">
       <Filter>헤더 파일\20</Filter>
     </ClInclude>
-    <ClInclude Include="tank_model.h">
-      <Filter>헤더 파일\20</Filter>
+    <ClInclude Include="21.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +77,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="20.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="21.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

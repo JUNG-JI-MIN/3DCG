@@ -282,7 +282,7 @@ vector<unsigned int> posin_index = {
         5, 1, 3,
         5, 3, 7
 };
-Tank tank(glm::vec3{ 0.0f,0.0f ,0.0f });
+Tank tank(glm::vec3{ 0.0f,-1.0f ,0.0f });
 
 char* filetobuf(const char* file)
 {
@@ -331,6 +331,15 @@ void TimerFunction(int value) {
 void all_reset() {
     tank.reset();
     camera.reset();
+
+    camera2.position = { 30.0f, 10.0f, 0.0f };
+    camera2.target = { 0.0f, 0.0f, 0.0f };
+    camera2.up = { 0.0f, 1.0f, 0.0f };
+
+    camera3.position = { 0.0f, 50.0f, 0.0f };
+    camera3.target = { 0.0f, 0.0f, 0.0f };
+    camera3.up = { 0.0f, 0.0f, 1.0f };
+
     rotate_tank_angle = 0.0f; rotate_posin_angle = 0.0f; rotate_flag_angle = 0.0f;
     d_posin_angle = 0.03f; d_flag_angle = 0.03f;
     RotateCamera = 0.0f; d_camera = 3.0f;
@@ -399,8 +408,8 @@ void onMouse(int button, int state, int x, int y) {
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	srand(time(NULL));
-	width = 500;
-	height = 500;
+	width = 1800;
+	height = 600;
 	//--- 윈도우 생성하기
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -416,6 +425,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	shaderProgramID = make_shaderProgram(); //--- 세이더 프로그램 만들기
 
     tank.Init();
+    ground_obj.Init();
 
 	glutDisplayFunc(drawScene); //--- 출력 콜백 함수
 	glutTimerFunc(16, TimerFunction, 1);  // 60 FPS
@@ -501,7 +511,27 @@ GLvoid drawScene() {
 	// 뒷면 제거 설정
 	glCullFace(GL_BACK);        // 뒷면을 제거
     tank.Update();
-    tank.Draw();
+    ground_obj.Update();  // 땅 업데이트
+
+    // 첫 번째 뷰포트 (왼쪽 1/3) - 메인 카메라
+    glViewport(0, 0, width / 3, height);
+    tank.Draw(camera,0);
+    result_matrix(camera, ground_obj);
+    ground_obj.Draw();
+
+    // 두 번째 뷰포트 (가운데 1/3) - 옆면 카메라
+    glViewport(width / 3, 0, width / 3, height);
+    tank.Draw(camera2,1);
+    result_matrix(camera2, ground_obj);
+    ground_obj.Draw();
+
+    // 세 번째 뷰포트 (오른쪽 1/3) - 탑 뷰 카메라
+    glViewport(width * 2 / 3, 0, width / 3, height);
+    tank.Draw(camera3,1);
+    result_matrix(camera3, ground_obj);
+    ground_obj.Draw();
+    // 뷰포트 리셋 (전체 화면으로)
+    glViewport(0, 0, width, height);
 
 	glutSwapBuffers();
 }

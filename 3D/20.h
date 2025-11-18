@@ -109,7 +109,7 @@ vector<unsigned int> create_sphere_index(int slices = 120) { // 여기서는 360 / 3
     }
     return sphere_index;
 }
-bool tank_move[4] = {false};
+bool tank_move[4] = { false };
 float rotate_tank_angle = 0.0f, rotate_posin_angle = 0.0f, rotate_flag_angle = 0.0f;
 float d_posin_angle = 0.03f, d_flag_angle = 0.03f;
 float RotateCamera = 0.0f, d_camera = 3.0f;
@@ -131,8 +131,8 @@ public:
     float fovy = 45.0f; // 시양각
     float aspect; // 종횡비 아직 w와 h가 없기 때문에 계산 불가
     float n = 0.1f; // near
-    float f = 100.0f; // far
-    float orthoScale = 2.5f; // 직각 투영 범위
+    float f = 150.0f; // far
+    float orthoScale = 10.0f; // 직각 투영 범위
     Camera(glm::vec3 pos, glm::vec3 tar, glm::vec3 u)
         : position(pos), target(tar), up(u) {
 
@@ -142,20 +142,20 @@ public:
         position = { 0.0f,25.0f,30.0f };
         target = { 0.0f,0.0f,0.0f };
         up = { 0.0f,1.0f,0.0f };
-	}
+    }
     void camera_PY() {
         glm::vec3 relativeTarget = target - position;
 
         glm::vec3 rotatedVector = glm::rotate(
             relativeTarget,
-            glm::radians(d_camera), 
+            glm::radians(d_camera),
             glm::vec3(0.0f, 1.0f, 0.0f)
         );
         target = position + rotatedVector;
     }
 
     void camera_TY() {
-        glm::vec3 relativeTarget =  position - target;
+        glm::vec3 relativeTarget = position - target;
 
         glm::vec3 rotatedVector = glm::rotate(
             relativeTarget,
@@ -173,7 +173,7 @@ public:
         return viewMatrix;
     }
     glm::mat4 Projection_matrix_update() {
-        aspect = (float)width / (float)height;
+        aspect = (float)width/3 / (float)height;
         glm::mat4 projectionMatrix = glm::mat4(1.0f);
         if (aspect <= 0.0f) {
             aspect = 1.0f; // 기본값으로 설정
@@ -185,16 +185,16 @@ public:
         return projectionMatrix;
     }
     glm::mat4 Orthographic_matrix_update() {
-        aspect = (float)width / (float)height;
+        aspect = (float)width / 3.0f / (float)height;
         if (aspect <= 0.0f) aspect = 1.0f;
-        float scale = orthoScale;
-        return glm::ortho(-scale * aspect, scale * aspect,
-            -scale, scale, n, f);
+        return glm::ortho(-orthoScale * aspect, orthoScale * aspect,
+            -orthoScale, orthoScale, n, f);
     }
 };
 
 Camera camera({ 0.0f,25.0f,30.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
-
+Camera camera2({ 30.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }); // 옆면 뷰
+Camera camera3({ 0.0f, 30.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }); // 탑뷰 (up 벡터 수정)
 
 class TankPart {
 public:
@@ -209,8 +209,8 @@ public:
     glm::quat ro = glm::quat(1, 0, 0, 0);
     // 이코드 에서 사용할거
     // 이 코드에서 사용할거
-    TankPart(const vector<Vertex>& ver, const vector<unsigned int>& ind, glm::vec3 a,glm::vec3 b)
-        :vertices(ver), indices(ind), move_xyz(a), part_xyz(b){
+    TankPart(const vector<Vertex>& ver, const vector<unsigned int>& ind, glm::vec3 a, glm::vec3 b)
+        :vertices(ver), indices(ind), move_xyz(a), part_xyz(b) {
     }
     void reset_state()
     {
@@ -269,7 +269,7 @@ public:
     void Draw()
     {
         glBindVertexArray(vao);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     }
     void Delete()
@@ -284,13 +284,11 @@ class TankBody : public TankPart {
 public:
     TankBody(const vector<Vertex>& ver,
         const vector<unsigned int>& ind,
-        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{0.0f,2.0f,0.0f}) {}
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 0.0f,2.0f,0.0f }) {
+    }
     glm::mat4 getModelMatrix(int a) override
     {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, move_xyz); // 이동하는 거
-        model = glm::rotate(model, glm::radians(rotate_tank_angle), { 0.0f,1.0f,0.0f });
-        model = glm::translate(model, -move_xyz); // 이동하는 거
         model = glm::translate(model, part_xyz);
         model = glm::translate(model, move_xyz); // 이동하는 거
         model = model * glm::mat4_cast(ro); // 자전
@@ -303,7 +301,8 @@ class TankCenter : public TankPart {
 public:
     TankCenter(const vector<Vertex>& ver,
         const vector<unsigned int>& ind,
-        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 0.0f,5.0f,0.0f }) {}
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 0.0f,5.0f,0.0f }) {
+    }
     glm::mat4 getModelMatrix(int a) override
     {
         glm::mat4 model = glm::mat4(1.0f);
@@ -320,9 +319,10 @@ public:
 };
 class TankTop : public TankPart {
 public:
-    TankTop(const vector<Vertex>& ver, 
+    TankTop(const vector<Vertex>& ver,
         const vector<unsigned int>& ind,
-        glm::vec3 pos) : TankPart(ver,ind, pos, glm::vec3{ 3.0f,7.5f,0.0f }) {}
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 3.0f,7.5f,0.0f }) {
+    }
     glm::mat4 getModelMatrix(int a) override
     {
         glm::mat4 model = glm::mat4(1.0f);
@@ -344,7 +344,8 @@ class Posin : public TankPart {
 public:
     Posin(const vector<Vertex>& ver,
         const vector<unsigned int>& ind,
-        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 3.0f,7.0f,2.0f }) {}
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 3.0f,7.0f,2.0f }) {
+    }
     glm::mat4 getModelMatrix(int a) override
     {
         glm::mat4 model = glm::mat4(1.0f);
@@ -359,10 +360,10 @@ public:
         model = glm::translate(model, move_xyz);
 
         model = glm::translate(model, { 0, 0,-2 });
-        if (a == 1) model = glm::rotate(model, rotate_posin_angle, {0,1,0});
+        if (a == 1) model = glm::rotate(model, rotate_posin_angle, { 0,1,0 });
         else model = glm::rotate(model, -rotate_posin_angle, { 0,1,0 });
-        model = glm::translate(model, { 0, 0,2}); // 이동하는 거
-        
+        model = glm::translate(model, { 0, 0,2 }); // 이동하는 거
+
         model = model * glm::mat4_cast(ro); // 자전
         model = glm::scale(model, multy);
 
@@ -373,7 +374,8 @@ class Flag : public TankPart {
 public:
     Flag(const vector<Vertex>& ver,
         const vector<unsigned int>& ind,
-        glm::vec3 pos) : TankPart(ver, ind, pos,glm::vec3{ 3.0f,11.0f,0.0f }) {}
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 3.0f,11.0f,0.0f }) {
+    }
     glm::mat4 getModelMatrix(int a) override
     {
         glm::mat4 model = glm::mat4(1.0f);
@@ -399,20 +401,40 @@ public:
     }
 };
 
-void result_matrix(Camera& camera, TankPart& tank, int a = 0, int b = 0) { // a는 반대편 인지, b는 flag posin
+void result_matrix(Camera& camera, TankPart& tank, int a = 0, int b = 0,int i = 0) { // a는 반대편 인지, b는 flag posin
     glm::mat4 modelMatrix;
-    glm::mat4 ex = glm::mat4{ 1.0f };
-    glm::mat4 uProj = camera.Projection_matrix_update();
+    glm::mat4 uProj = glm::mat4{ 1.0f };
+    if (i == 1) uProj = camera.Orthographic_matrix_update();
+    else uProj = camera.Projection_matrix_update();
     glm::mat4 uModel = tank.getModelMatrix(a);
     glm::mat4 uView = camera.View_matrix_update();
+    
     modelMatrix = uProj * uView * uModel;
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    
+
 }
+class Ground : public TankPart {
+public:
+    Ground(const vector<Vertex>& ver,
+        const vector<unsigned int>& ind,
+        glm::vec3 pos) : TankPart(ver, ind, pos, glm::vec3{ 0.0f, -1.0f, 0.0f }) {
+    }
+
+    glm::mat4 getModelMatrix(int a) override
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        // 땅은 고정된 위치에 있으므로 간단한 변환만 적용
+        model = glm::translate(model, part_xyz);  // 기본 위치
+        model = glm::translate(model, move_xyz);  // 추가 이동 (필요시)
+        model = model * glm::mat4_cast(ro);       // 회전
+        model = glm::scale(model, multy);         // 스케일
+        return model;
+    }
+};
 class Tank {
 private:
-    
+
 public:
     TankBody tbody;
     TankCenter tcenter;
@@ -425,14 +447,15 @@ public:
         tflag(flag, flag_index, pos),
         ttop(top, top_index, pos),
         tposin(posin, posin_index, pos)
-    {}
+    {
+    }
     void reset() {
         tbody.reset_state();
         tcenter.reset_state();
         tflag.reset_state();
         ttop.reset_state();
         tposin.reset_state();
-	}
+    }
     void Init() {
         tbody.Init();
         tcenter.Init();
@@ -447,30 +470,30 @@ public:
         ttop.Update();
         tposin.Update();
     }
-    void Draw() {
-        
-        result_matrix(camera, tbody);
+    void Draw(Camera& ca, int i) {
+
+        result_matrix(ca, tbody, 0, 0, i);
         tbody.Draw();
 
-        result_matrix(camera, tcenter);
+        result_matrix(ca, tcenter, 0, 0, i);
         tcenter.Draw();
 
-        result_matrix(camera, tflag, 0,2);
+        result_matrix(ca, tflag, 0, 2, i);
         tflag.Draw();
 
-        result_matrix(camera, ttop);
+        result_matrix(ca, ttop, 0, 0, i);
         ttop.Draw();
 
-        result_matrix(camera, tposin,0,1);
+        result_matrix(ca, tposin, 0, 1, i);
         tposin.Draw();
         // 반대쪽 구현
-        result_matrix(camera, tflag,1,2);
+        result_matrix(ca, tflag, 1, 2, i);
         tflag.Draw();
 
-        result_matrix(camera, ttop, 1);
+        result_matrix(ca, ttop, 1, 0, i);
         ttop.Draw();
 
-        result_matrix(camera, tposin, 1,1);
+        result_matrix(ca, tposin, 1, 1, i);
         tposin.Draw();
     }
     void moveing_man(float dx, float dy, float dz) {
@@ -488,7 +511,7 @@ public:
     }
     void Top_trace() {
         if (tflag.part_xyz.x < 3.0f)
-        { 
+        {
             tflag.part_xyz.x += 0.1f;
             ttop.part_xyz.x += 0.1f;
             tposin.part_xyz.x += 0.1f;
@@ -513,7 +536,7 @@ public:
             d_posin_angle *= -1.0f;
         }
     }
-    void flag_X(int a =0) {
+    void flag_X(int a = 0) {
         rotate_flag_angle += d_flag_angle;
 
         // ★ 범위 체크 후 클램프
@@ -622,3 +645,39 @@ void result_line_matrix(Camera& camera, Line& line) {
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
+// tank_model.h 뒤나 적절한 위치에 추가
+vector<Vertex> ground = {
+    // 8개의 꼭짓점 정의 (100 x 2 x 100 크기)
+    // 앞면 (Z = 50)
+    { glm::vec3(-50.0f, -2.0f,  50.0f), glm::vec4(0.5f, 0.8f, 0.3f, 1.0f) }, // 0: 왼쪽-아래-앞
+    { glm::vec3(50.0f, -2.0f,  50.0f), glm::vec4(0.5f, 0.8f, 0.3f, 1.0f) }, // 1: 오른쪽-아래-앞
+    { glm::vec3(50.0f,  0.0f,  50.0f), glm::vec4(1.0f, 0.7f, 0.2f, 1.0f) }, // 2: 오른쪽-위-앞
+    { glm::vec3(-50.0f,  0.0f,  50.0f), glm::vec4(0.4f, 1.0f, 0.2f, 1.0f) }, // 3: 왼쪽-위-앞
+
+    // 뒷면 (Z = -50)
+    { glm::vec3(-50.0f, -2.0f, -50.0f), glm::vec4(0.5f, 0.8f, 0.3f, 1.0f) }, // 4: 왼쪽-아래-뒤
+    { glm::vec3(50.0f, -2.0f, -50.0f), glm::vec4(0.5f, 0.8f, 0.3f, 1.0f) }, // 5: 오른쪽-아래-뒤
+    { glm::vec3(50.0f,  0.0f, -50.0f), glm::vec4(0.4f, 0.7f, 1.0f, 1.0f) }, // 6: 오른쪽-위-뒤
+    { glm::vec3(-50.0f,  0.0f, -50.0f), glm::vec4(0.0f, 0.0f, 0.2f, 1.0f) }  // 7: 왼쪽-위-뒤
+};
+
+vector<unsigned int> ground_index = {
+    // 윗면 (Y = 0) - 녹색 계열
+    3, 2, 6,  3, 6, 7,
+
+    // 아랫면 (Y = -2)
+    0, 4, 5,  0, 5, 1,
+
+    // 앞면 (Z = 50)
+    0, 1, 2,  0, 2, 3,
+
+    // 뒷면 (Z = -50)
+    5, 4, 7,  5, 7, 6,
+
+    // 왼쪽면 (X = -50)
+    4, 0, 3,  4, 3, 7,
+
+    // 오른쪽면 (X = 50)
+    1, 5, 6,  1, 6, 2
+};
+Ground ground_obj(ground, ground_index, glm::vec3{ 0.0f, 0.0f, 0.0f });
