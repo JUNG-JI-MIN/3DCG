@@ -27,6 +27,8 @@
     <None Include="19.h">
       <Filter>헤더 파일</Filter>
     </None>
+    <None Include="fragment25.glsl" />
+    <None Include="vertex25.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="14.h">
@@ -51,6 +53,15 @@
       <Filter>헤더 파일\20</Filter>
     </ClInclude>
     <ClInclude Include="21.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="26.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="25.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="27.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,6 +91,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="21.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="26.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="25.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="27.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

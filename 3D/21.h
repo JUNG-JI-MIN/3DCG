@@ -37,6 +37,7 @@ float dy_rotate = 2.0f;
 float d_angle = 0.0f;
 float world_angle = 0.0f;
 float startx = 0.0f;
+bool opened = false;
 vector<Vertex> create_sphere(float r = 1.0f) {
     vector<Vertex> circle_vertices;
     glm::vec4 color = { 0.0f, 1.0f, 1.0f, 1.0f };
@@ -195,6 +196,7 @@ public:
     glm::vec3 multy = { 1.0f, 1.0f, 1.0f };
     glm::quat ro = glm::quat(1, 0, 0, 0);
     // 이코드 에서 사용할거
+    float open_angle = 0.0f , d_open_angle = -0.1f;
     // 이 코드에서 사용할거
     Shape(const vector<Vertex>& ver, const vector<unsigned int>& ind, glm::vec3 a)
         :vertices(ver), indices(ind), move_xyz(a) {
@@ -218,6 +220,39 @@ public:
         move_xyz.y += dy;
         move_xyz.z += dz;
     }
+    void open_Draw() {
+        if (open_angle <= -70.0f) return;
+        open_angle += d_open_angle; // 각도를 라디안으로 증가
+
+        double angle = glm::radians(open_angle);
+
+        // 기준 축
+        const double cx = -3.0;
+        const double cy = -3.0;
+
+        for (int i = 12; i < 16; i++) {
+
+            glm::vec3& v = vertices[i].position;
+
+            // 1) 회전축 기준으로 이동
+            double tx = v.x - cx;
+            double ty = v.y - cy;
+
+            // 2) 회전 (z축 기준)
+            double rx = tx * cos(angle);
+            double ry = tx * sin(angle);
+
+            // 3) 원래 위치로 이동
+            v.x = rx + cx;
+            v.y = ry + cy;
+            // z는 그대로: v.z = v.z;
+        }
+
+        // GPU(VBO) 업데이트
+        Update();
+    }
+
+
     glm::mat4 getModelMatrix()
     {
         glm::mat4 modelMatrix(1.0f);
@@ -264,8 +299,8 @@ public:
     void Draw()
     {
         glBindVertexArray(vao);
-
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        
     }
     void Delete()
     {
@@ -273,6 +308,7 @@ public:
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ebo);
     }
+
 };
 class Cube : public Shape {
 public:
@@ -290,13 +326,11 @@ public:
         // Cube의 크기 정보를 저장하여 충돌 검사에 사용합니다.
         // 현재 create_cube가 (x, y, z)를 multy로 설정하지 않으므로, 충돌 검사 시 직접 전달해야 합니다.
     }
-
-    // Rotation 함수는 큐브의 자전에 사용되며, 낙하 로직에는 영향을 주지 않습니다.
-    // 이전 코드에서 banghyang을 갱신하는 부분은 제거했습니다.
     void Rotation(float dAngleX, float dAngleY, float dAngleZ)
     {
         Shape::Rotation(dAngleX, dAngleY, dAngleZ);
     }
+    
 
     void applyGravity_WorldSpace(float current_world_angle)
     {
@@ -342,15 +376,16 @@ public:
         }
 
         // Y축 경계 (천장/바닥)
-        if (world_pos.y + cube_size >= space_bound) {
-            world_pos.y = space_bound - cube_size;
-            collision_detected = true;
+        if (!opened) {
+            if (world_pos.y + cube_size >= space_bound) {
+                world_pos.y = space_bound - cube_size;
+                collision_detected = true;
+            }
+            else if (world_pos.y - cube_size <= -space_bound) {
+                world_pos.y = -space_bound + cube_size;
+                collision_detected = true;
+            }
         }
-        else if (world_pos.y - cube_size <= -space_bound) {
-            world_pos.y = -space_bound + cube_size;
-            collision_detected = true;
-        }
-
         // Z축 경계 (앞/뒤 벽)
         if (world_pos.z + cube_size >= space_bound) {
             world_pos.z = space_bound - cube_size;
@@ -388,14 +423,81 @@ void result_matrix(Camera& camera, Shape& shpae) { // a는 반대편 인지, b는 flag 
     glm::mat4 uProj = camera.Projection_matrix_update();
     glm::mat4 uModel = shpae.getModelMatrix();
     glm::mat4 uView = camera.View_matrix_update();
-
     modelMatrix = uProj * uView * uModel;
     GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 }
 
-Shape space(create_cube(3,3,3), create_cube_index(), glm::vec3{0,0,0});
+Shape space = {
+    // 24개의 정점 선언 (위치는 8개, 색상 때문에 24개로 복제)
+    {
+        // ----------------- 앞면 (RED) ------------------
+        { glm::vec3(-3.0f, -3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) }, // 0
+        { glm::vec3(3.0f, -3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) }, // 1
+        { glm::vec3(3.0f,  3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) }, // 2
+        { glm::vec3(-3.0f,  3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) }, // 3
+
+        // ----------------- 뒷면 (GREEN) -----------------
+        { glm::vec3(-3.0f, -3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) }, // 4
+        { glm::vec3(3.0f, -3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) }, // 5
+        { glm::vec3(3.0f,  3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) }, // 6
+        { glm::vec3(-3.0f,  3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) }, // 7
+
+        // ----------------- 윗면 (BLUE) ------------------
+        { glm::vec3(-3.0f,  3.0f,  3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) }, // 8 (위치 V3 복제)
+        { glm::vec3(3.0f,  3.0f,  3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) }, // 9 (위치 V2 복제)
+        { glm::vec3(3.0f,  3.0f, -3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) }, // 10 (위치 V6 복제)
+        { glm::vec3(-3.0f,  3.0f, -3.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) }, // 11 (위치 V7 복제)
+
+        // ... 나머지 3개 면도 같은 방식으로 고유 색상 부여 후 4개씩 복제 ...
+
+        // ----------------- 아랫면 (CYAN) ----------------
+        { glm::vec3(-3.0f, -3.0f,  3.0f), glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) }, // 12
+        { glm::vec3(3.0f, -3.0f,  3.0f), glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) }, // 13
+        { glm::vec3(3.0f, -3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) }, // 14
+        { glm::vec3(-3.0f, -3.0f, -3.0f), glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) }, // 15
+
+        // ----------------- 왼쪽 면 (MAGENTA) ---------------
+        { glm::vec3(-3.0f, -3.0f, -3.0f), glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) }, // 16
+        { glm::vec3(-3.0f, -3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) }, // 17
+        { glm::vec3(-3.0f,  3.0f,  3.0f), glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) }, // 18
+        { glm::vec3(-3.0f,  3.0f, -3.0f), glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) }, // 19
+
+        // ----------------- 오른쪽 면 (YELLOW) --------------
+        { glm::vec3(3.0f, -3.0f,  3.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) }, // 20
+        { glm::vec3(3.0f, -3.0f, -3.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) }, // 21
+        { glm::vec3(3.0f,  3.0f, -3.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) }, // 22
+        { glm::vec3(3.0f,  3.0f,  3.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) }  // 23
+    },
+    // 36개 인덱스 (12개 삼각형)
+    {
+        // Front (0, 1, 2, 3) -> Red
+        0, 1, 2,
+        2, 3, 0,
+
+        // Back (4, 5, 6, 7) -> Green
+        4, 6, 5,
+        6, 4, 7,
+
+        // Top (8, 9, 10, 11) -> Blue
+        8, 9, 10,
+        10, 11, 8,
+
+        // Bottom (12, 13, 14, 15) -> Cyan
+        12, 14, 13,
+        14, 12, 15,
+
+        // Left (16, 17, 18, 19) -> Magenta
+        16, 17, 18,
+        18, 19, 16,
+
+        // Right (20, 21, 22, 23) -> Yellow
+        20, 21, 22,
+        22, 23, 20
+    },
+	glm::vec3(0.0f, 0.0f, 0.0f) // 초기 위치
+};
 vector<Cube> cubes;
 void initialize_cubes() {
     // 큐브 크기 정의 (x=y=z 가정)
@@ -410,7 +512,7 @@ void initialize_cubes() {
     Cube cube2(create_cube(size2, size2, size2), create_cube_index(), glm::vec3{ 0.0f, 0.0f, 0.7f });
     cube2.multy = glm::vec3(size2);
     cube2.Init();
-    cubes.push_back(cube2);
+    cubes.push_back(cube2);  
 
     Cube cube3(create_cube(size3, size3, size3), create_cube_index(), glm::vec3{0.0f, 0.0f, 0.0f });
     cube3.multy = glm::vec3(size3);

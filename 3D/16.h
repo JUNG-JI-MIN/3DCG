@@ -106,7 +106,7 @@ public:
         glm::mat4 T = get_T_Matrix(move_xyz);
         glm::mat4 S = get_S_Matrix(multy);
         glm::mat4 modelMatrix = T * R * S; // TRS ¼ø¼­·Î Çà·Ä °ö¼À
-        GLuint modelLoc = glGetUniformLocation(shaderProgramID, "uModel");
+        GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     }
     void Init()

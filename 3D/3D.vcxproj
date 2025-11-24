@@ -131,7 +131,9 @@
   <ItemGroup>
     <None Include="19.h" />
     <None Include="fragment.glsl" />
+    <None Include="fragment25.glsl" />
     <None Include="vertex.glsl" />
+    <None Include="vertex25.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="14.h" />
@@ -141,6 +143,9 @@
     <ClInclude Include="18.h" />
     <ClInclude Include="20.h" />
     <ClInclude Include="21.h" />
+    <ClInclude Include="25.h" />
+    <ClInclude Include="26.h" />
+    <ClInclude Include="27.h" />
     <ClInclude Include="tank_model.h" />
   </ItemGroup>
   <ItemGroup>
@@ -169,9 +174,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="21.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="25.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="26.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="27.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

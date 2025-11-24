@@ -22,23 +22,39 @@ void TimerFunction(int value) {
     for (auto& ball : Balls) {
         ball.add_XYZ(ball.velocity.x/10, ball.velocity.y / 10, ball.velocity.z / 10);
 		// 벽과 충돌 검사
-        if (abs(ball.move_xyz.x) + ball.radius > 3.0f) {
-            ball.velocity.x = -ball.velocity.x;
-            ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+        if (ball.move_xyz.y > -3) {
+            if (abs(ball.move_xyz.x) + ball.radius > 3.0f) {
+                ball.velocity.x = -ball.velocity.x;
+                ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+            }
+            if (abs(ball.move_xyz.z) + ball.radius > 3.0f) {
+                ball.velocity.z = -ball.velocity.z;
+                ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+            }
         }
-        if (abs(ball.move_xyz.y) + ball.radius > 3.0f) {
-            ball.velocity.y = -ball.velocity.y;
-            ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+        if (!opened) {
+            if (abs(ball.move_xyz.y) + ball.radius > 3.0f) {
+                ball.velocity.y = -ball.velocity.y;
+                ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+            }
         }
-        if (abs(ball.move_xyz.z) + ball.radius > 3.0f) {
-            ball.velocity.z = -ball.velocity.z;
-            ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
-		}
+        else {
+            if (ball.move_xyz.y + ball.radius > 3.0f) {
+                ball.velocity.y = -ball.velocity.y;
+                ball.add_XYZ(ball.velocity.x / 10, ball.velocity.y / 10, ball.velocity.z / 10);
+            }
+        }
+        
     }
     if (yrotate) {
 		camera.position = glm::rotateY(camera.position, glm::radians(dy_rotate));
 	}
-    
+    if (opened) {
+        if (space.open_angle > -80.f) {
+            space.open_Draw();
+			cout << space.open_angle << endl;
+        }
+    }
     glm::quat space_rotation = space.ro; // space의 현재 회전 쿼터니언을 가져옵니다.
 
     for (auto& cube : cubes) {
@@ -70,6 +86,8 @@ void onKey(unsigned char key, int x, int y) {
 
     case 'b':
     case 'B': initialize_spheres(1); break;
+
+    case 'a': opened = !opened; break;
     }
     glutPostRedisplay();
 }
