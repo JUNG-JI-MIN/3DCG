@@ -84,7 +84,7 @@ public:
         glm::mat4 R = get_R_Matrix(rotateZ, { 0.0f,1.0f,.0f });
         glm::mat4 S = get_S_Matrix(multy);
         glm::mat4 modelMatrix = T * R * S; // TRS ¼ø¼­·Î Çà·Ä °ö¼À
-        GLuint modelLoc = glGetUniformLocation(shaderProgramID, "uModel");
+        GLuint modelLoc = glGetUniformLocation(shaderProgramID, "u");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     }
     void Init()
