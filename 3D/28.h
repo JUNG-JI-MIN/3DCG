@@ -71,7 +71,7 @@ vector<Vertex> create_circle(float r = 1.0f) {
 }
 vector<Vertex> create_sphere(float r = 1.0f, int kind = 0) {
     vector<Vertex> circle_vertices;
-    glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glm::vec4 color = { random(0,1), random(0,1), random(0,1), 1.0f};
     float uangle = 0.0f, vangle = 0.0f, d_angle = 3.0f;
     while (vangle <= 360) {
         uangle = 0.0f;
@@ -81,15 +81,6 @@ vector<Vertex> create_sphere(float r = 1.0f, int kind = 0) {
             float x = r * cos(u) * sin(v);
             float y = r * cos(v);
             float z = r * sin(u) * sin(v);
-            if (kind == 0) {
-                color = { uangle / 360, 1.0f, 1.0f, 1.0f };
-            }
-            else if (kind == 1) {
-                color = { 1.0f, uangle / 360, 1.0f, 1.0f };
-            }
-            else if (kind == 2) {
-                color = { 1.0f, 1.0f,uangle / 360, 1.0f };
-            }
             circle_vertices.push_back({ glm::vec3(x, y, z), glm::vec4(color), glm::normalize(glm::vec3(x, y, z)) });
             uangle += d_angle;
         }
@@ -608,9 +599,9 @@ vector<Shape*> shapes;
 vector<Shape*> snows;
 //Shape c4(create_sphere(0.5f, 0), create_sphere_index(), glm::vec3{ 0.0f,0.0f,0.0f }, 0, 0);
 
-Shape a1(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, 45, 1);
-Shape a2(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, -45, 1);
-Shape a3(create_sphere(0.2f, 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, 0, 1);
+Shape a1(create_sphere(random(0.2, 0.7), 1), create_sphere_index(), glm::vec3{1.5f,0.0f,0.0f}, 45, 1);
+Shape a2(create_sphere(random(0.2, 0.7), 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, -45, 1);
+Shape a3(create_sphere(random(0.2, 0.7), 1), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, 0, 1);
 
 Shape b1(create_sphere(0.1f, 2), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, 45, 2);
 Shape b2(create_sphere(0.1f, 2), create_sphere_index(), glm::vec3{ 1.5f,0.0f,0.0f }, -45, 2);
