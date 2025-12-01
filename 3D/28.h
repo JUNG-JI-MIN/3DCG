@@ -657,7 +657,7 @@ void snows_init() {
         float z = random(-5.0f, 5.0f);
         Shape* snow = new Shape(create_cube(0.05f, 0.05f, 0.05f), create_cube_index(), glm::vec3{ x,y,z }, 0, 0);
 		snow->plus_xyz = glm::vec3{ x,y,z };
-		snow->d_angle = random(0.0f, 2.0f);
+		snow->d_angle = random(0.0f, 0.5f);
 		snow->Init();
         snows.push_back(snow);
     }

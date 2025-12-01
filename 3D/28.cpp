@@ -26,7 +26,7 @@ void TimerFunction(int value) {
 		}
 	}
 	for (auto& s : snows) {
-		if (s->plus_xyz.y <= 19.9f && s->plus_xyz.y > 0) s->plus_xyz.y -= s->d_angle;
+		if (s->plus_xyz.y <= 19.9f && s->plus_xyz.y > -50) s->plus_xyz.y -= s->d_angle;
 		else s->plus_xyz.y = 20.0f;
 	}
 
