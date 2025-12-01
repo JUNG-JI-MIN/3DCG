@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="19.h" />
+    <None Include="28.h" />
     <None Include="fragment.glsl" />
     <None Include="fragment25.glsl" />
     <None Include="tvertex.glsl" />
@@ -188,9 +189,9 @@
     <ClCompile Include="27.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="28.cpp" />
     <ClCompile Include="29.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
