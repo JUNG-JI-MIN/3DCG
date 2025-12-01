@@ -19,7 +19,7 @@ char* filetobuf(const char* file)
 }
 // 타이머 함수 구현
 void TimerFunction(int value) {
-	if (light_rotate) {
+	if (!light_rotate) {
 		if (light_angle >= 360) light_angle = 0;
 		light_angle += d_light_angle / ring;
 
@@ -111,9 +111,13 @@ void onKey(unsigned char key, int x, int y) {
 	}
 	else if (key == '4') {
 		ring += 0.3f;
+		light.position.x = ring * 2.0f * cos(glm::radians(light_angle));
+		light.position.z = ring * 2.0f * sin(glm::radians(light_angle));
 	}
 	else if (key == '$') {
 		ring -= 0.3f;
+		light.position.x = ring * 2.0f * cos(glm::radians(light_angle));
+		light.position.z = ring * 2.0f * sin(glm::radians(light_angle));
 	}
 	// 회전
 	else if (key == 'h') {
@@ -251,6 +255,17 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	camera_line.Init();
 	camera_cube.Init();
 	camera_cube.move_xyz = light.position;
+
+	// 조명 관련 명령어 출력
+	cout << "\n========== 조명 관련 명령어 ==========" << endl;
+	cout << "'1' : 조명 ON/OFF" << endl;
+	cout << "'2' : 조명 시계방향 회전 ON/OFF" << endl;
+	cout << "'@' : 조명 반시계방향 회전 ON/OFF" << endl;
+	cout << "'3' : 큐브 시계방향 회전 (5도)" << endl;
+	cout << "'#' : 큐브 반시계방향 회전 (-5도)" << endl;
+	cout << "'4' : 조명 거리 증가" << endl;
+	cout << "'$' : 조명 거리 감소" << endl;
+	cout << "===================================\n" << endl;
 
 	shaderProgramID = make_shaderProgram();
 	//--- 세이더 프로그램 만들기

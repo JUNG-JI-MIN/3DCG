@@ -111,6 +111,8 @@ void onKey(unsigned char key, int x, int y) {
 	case '4':
         light_rotate = false;
         break;
+
+        
 	//카메라 관련
     case 'z': camera.position.z -= 1.0f; break;
     case 'Z': camera.position.z += 1.0f; break;
@@ -197,6 +199,14 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
     tank.Init();
     ground_obj.Init();
 	camera_cube.Init();
+
+    cout << "\n========== 조명 관련 명령어 ==========" << endl;
+    cout << "'1' : 조명 ON/OFF" << endl;
+    cout << "'2' : 조명 색 변경 " << endl;
+    cout << "'3' : 조명 시계방향 회전" << endl;
+    cout << "'#' : 조명 반시계 방향 회전" << endl;
+    cout << "'4' : 조명 회전 멈춤" << endl;
+    cout << "===================================\n" << endl;
 
     glutDisplayFunc(drawScene); //--- 출력 콜백 함수
     glutTimerFunc(16, TimerFunction, 1);  // 60 FPS

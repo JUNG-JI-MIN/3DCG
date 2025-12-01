@@ -133,6 +133,8 @@ void onKey(unsigned char key, int x, int y) {
 		d_light_angle = -3.0f;
 		break;
 
+		
+
 	case 'q': exit(1);
 	}
 	glutPostRedisplay();
@@ -195,6 +197,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	b2.d_real_gong_angle = a2.d_real_gong_angle;
 	b3.d_real_gong_angle = a3.d_real_gong_angle;
 	cout << "'o가 초기화'" << endl;
+
+	cout << "\n========== 조명 관련 명령어 ==========" << endl;
+	cout << "'1' : 조명 색 변경" << endl;
+	cout << "'2' : 조명 시계방향 회전 " << endl;
+	cout << "'3' : 조명 반시계 방향 회전" << endl;
+	cout << "===================================\n" << endl;
 
 	// 카메라 위치도 셰이더에 전달
 	GLuint u = glGetUniformLocation(shaderProgramID, "viewPos");
