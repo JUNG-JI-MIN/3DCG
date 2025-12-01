@@ -16,6 +16,9 @@
     <Filter Include="헤더 파일\20">
       <UniqueIdentifier>{ac8c400e-1a98-4dbe-93ad-820bc59c6cee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\tex">
+      <UniqueIdentifier>{0c5659e1-d77d-4ee3-b267-706885499cb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.glsl">
@@ -29,6 +32,9 @@
     </None>
     <None Include="fragment25.glsl" />
     <None Include="vertex25.glsl" />
+    <None Include="tvertex.glsl">
+      <Filter>소스 파일\tex</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="14.h">
@@ -64,12 +70,15 @@
     <ClInclude Include="27.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="29.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tfragment.glsl">
+      <Filter>소스 파일\tex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="14.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\zjavbxjrmfovlrtm\zjavbxjrmfovlrtm\1-10.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="15.cpp">
@@ -100,6 +109,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="27.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="29.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\zjavbxjrmfovlrtm\zjavbxjrmfovlrtm\1-10.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
