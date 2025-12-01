@@ -114,20 +114,21 @@ void onKey(unsigned char key, int x, int y) {
 
 	case '+': moving(0.0f, 0.0f, 0.5f); break;
 	case '-': moving(0.0f, 0.0f, -0.5f); break;
+	
+	// 조명 관련
 
-	case 'c': 
-	case 'C':
+	case '1':
 		light.light_color = {light_color[light_color_count][0],
 							light_color[light_color_count][1],
 							light_color[light_color_count][2] };
 		light_color_count = (light_color_count+1)%5; 
 		light.apply_color(); 
 		break;
-	case 'r':
+	case '2':
 		light_rotate = !light_rotate;
 		d_light_angle = 3.0f;
 		break;
-	case 'R':
+	case '3':
 		light_rotate = !light_rotate;
 		d_light_angle = -3.0f;
 		break;

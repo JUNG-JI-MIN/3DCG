@@ -28,7 +28,7 @@ bool qkseofh = false;
 bool change = false;
 int style = GL_TRIANGLES;
 int radius_change = 1;
-bool depth_test_enabled = true, timer = false;
+bool depth_test_enabled = true, timer = true;
 
 float light_angle = 0.0f, d_light_angle = 3.0f;
 bool light_rotate = true,light_off = false;

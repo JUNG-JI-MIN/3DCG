@@ -86,35 +86,36 @@ void TimerFunction(int value) {
 void onKey(unsigned char key, int x, int y) {
 	if (key == 'p') change = !change;
 
-	else if (key == 'm') {
+	// 조명 켜기/끄기
+	else if (key == '1') {
 		light_off = !light_off;
 		// 조명 활성화 여부를 셰이더에 전달
 		GLuint lightEnabledLoc = glGetUniformLocation(shaderProgramID, "turn_off");
 		glUniform1i(lightEnabledLoc, light_off ? 0 : 1);
 	}
-	else if (key == 'r') {
+	else if (key == '2') {
 		light_rotate = !light_rotate;
 		d_light_angle = 3.0f;
 	}
-	else if (key == 'R') {
+	else if (key == '@') {
 		light_rotate = !light_rotate;
 		d_light_angle = -3.0f;
 	}
-	else if (key == 'y') {
+	else if (key == '3') {
 		cube.ja_addRotation(0.0f, 5.0f, 0.0f);
 		pyramid.ja_addRotation(0.0f, 5.0f, 0.0f);
 	}
-	else if (key == 'Y') {
+	else if (key == '#') {
 		cube.ja_addRotation(0.0f, -5.0f, 0.0f);
 		pyramid.ja_addRotation(0.0f, -5.0f, 0.0f);
 	}
-	else if (key == 'z') {
+	else if (key == '4') {
 		ring += 0.3f;
 	}
-	else if (key == 'Z') {
+	else if (key == '$') {
 		ring -= 0.3f;
 	}
-
+	// 회전
 	else if (key == 'h') {
 		depth_test_enabled = !depth_test_enabled;
 		if (depth_test_enabled)

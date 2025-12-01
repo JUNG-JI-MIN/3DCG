@@ -19,21 +19,31 @@
     <Filter Include="소스 파일\tex">
       <UniqueIdentifier>{0c5659e1-d77d-4ee3-b267-706885499cb0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\조명">
+      <UniqueIdentifier>{7be57af6-faf9-4cda-8742-8f19441a18b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\잡">
+      <UniqueIdentifier>{53e17cc5-a4ed-4e1b-a4f1-77b1f060ccd3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertex.glsl">
-      <Filter>소스 파일</Filter>
-    </None>
-    <None Include="fragment.glsl">
-      <Filter>소스 파일</Filter>
-    </None>
     <None Include="19.h">
       <Filter>헤더 파일</Filter>
     </None>
-    <None Include="fragment25.glsl" />
-    <None Include="vertex25.glsl" />
     <None Include="tvertex.glsl">
       <Filter>소스 파일\tex</Filter>
+    </None>
+    <None Include="fragment25.glsl">
+      <Filter>소스 파일\조명</Filter>
+    </None>
+    <None Include="vertex25.glsl">
+      <Filter>소스 파일\조명</Filter>
+    </None>
+    <None Include="fragment.glsl">
+      <Filter>소스 파일\잡</Filter>
+    </None>
+    <None Include="vertex.glsl">
+      <Filter>소스 파일\잡</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -78,44 +88,44 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="14.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="15.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="16.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="17.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="18.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="19.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="20.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="21.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="26.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="29.cpp">
+      <Filter>소스 파일\tex</Filter>
     </ClCompile>
     <ClCompile Include="25.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\조명</Filter>
+    </ClCompile>
+    <ClCompile Include="26.cpp">
+      <Filter>소스 파일\조명</Filter>
     </ClCompile>
     <ClCompile Include="27.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\조명</Filter>
     </ClCompile>
-    <ClCompile Include="29.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="14.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="15.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="16.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="17.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="18.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="19.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="20.cpp">
+      <Filter>소스 파일\잡</Filter>
+    </ClCompile>
+    <ClCompile Include="21.cpp">
+      <Filter>소스 파일\잡</Filter>
     </ClCompile>
     <ClCompile Include="..\..\zjavbxjrmfovlrtm\zjavbxjrmfovlrtm\1-10.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\잡</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -187,7 +187,7 @@ vector<unsigned int> create_sphere_index(int slices = 120) { // 여기서는 360 / 3
 vector<unsigned int> create_pyramid_index() {
     return {
         // 면 1: 앞면
-        0, 1, 2,
+        0, 2, 1,
 
         // 면 2: 왼쪽면
         3, 4, 5,
@@ -204,82 +204,60 @@ vector<unsigned int> create_pyramid_index() {
     };
 }
 vector<Vertex> create_pyramid() {
-    // 사각뿔 꼭지점 및 밑면 정점 좌표
-    const glm::vec3 P_APEX(0.0f, 1.0f, 0.0f);
-    const glm::vec3 P_FL(-1.0f, -1.0f, 1.0f); // 앞 왼쪽
-    const glm::vec3 P_FR(1.0f, -1.0f, 1.0f); // 앞 오른쪽
-    const glm::vec3 P_BL(-1.0f, -1.0f, -1.0f); // 뒤 왼쪽
-    const glm::vec3 P_BR(1.0f, -1.0f, -1.0f); // 뒤 오른쪽
 
-    // 계산된 노멀 벡터 (정규화된 근사값)
-    const glm::vec3 N_FRONT = { 0.0f, 0.7071f, 0.7071f };
-    const glm::vec3 N_LEFT = { -0.7071f, 0.7071f, 0.0f };
-    const glm::vec3 N_BACK = { 0.0f, 0.7071f, -0.7071f };
-    const glm::vec3 N_RIGHT = { 0.7071f, 0.7071f, 0.0f };
-    const glm::vec3 N_BASE = { 0.0f, -1.0f, 0.0f };
+    // 법선 벡터 (정규화)
+    const glm::vec3 N_FRONT = glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f));
+    const glm::vec3 N_LEFT = glm::normalize(glm::vec3(-1.0f, 1.0f, 0.0f));
+    const glm::vec3 N_BACK = glm::normalize(glm::vec3(0.0f, 1.0f, -1.0f));
+    const glm::vec3 N_RIGHT = glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f));
+    const glm::vec3 N_BASE = glm::vec3(0.0f, -1.0f, 0.0f);
 
     // UV 경계값
-    const float U0 = 0; // 맨 오른쪽
-    const float V0 = 0; // 맨 아래
     const float U1 = 0.333333f; 
-    const float U2 = 0.666667f;
+    const float U2 = 0.5f;
+    const float U3 = 0.666667f;
+
     const float V1 = 0.333333f;
-    const float V2 = 0.666667f;
-
-    // UV 중앙값
-    const float U_MID = 0.5f;
-    const float V_MID = 0.5f;
-
-    // 미드포인트 계산
-    const float U_TOP_MID = (U1 + U2) * 0.5f;
-    const float V_TOP_MID = (V2 + 1.0f) * 0.5f;
-
-    const float U_LEFT_MID = (U0 + U1) * 0.5f;
-    const float V_LEFT_MID = (V1 + V2) * 0.5f;
-
-    const float U_RIGHT_MID = (U2 + 1.0f) * 0.5f;
-    const float V_RIGHT_MID = (V1 + V2) * 0.5f;
-
-    const float U_BOTTOM_MID = (U1 + U2) * 0.5f;
-    const float V_BOTTOM_MID = (0.0f + V1) * 0.5f;
+    const float V2 = 0.5f;
+    const float V3 = 0.666667f;
 
     vector<Vertex> pyramid_vertices = {
 
         // =========================================================================
         // 1. 앞면 (+Z) - Top 삼각형
-        { {0.0f, 1.0f, 0.0f}, color, N_FRONT, {U_TOP_MID, 1.0f} }, // Apex
-        { {1.0f, -1.0f, 1.0f},  color, N_FRONT, {U2, V_TOP_MID} }, // Right-mid
-        { {-1.0f, -1.0f, 1.0f}, color, N_FRONT, {U1, V_TOP_MID} }, // Left-mid
+        { {0.0f, 1.0f, 0.0f}, color, N_FRONT, {U2, 1.0f} }, // Apex
+        { {1.0f, -1.0f, 1.0f},  color, N_FRONT, {U3, V3} }, // Right-mid
+        { {-1.0f, -1.0f, 1.0f}, color, N_FRONT, {U1, V3} }, // Left-mid
 
         // =========================================================================
         // 2. 왼쪽면 (-X) - Left 삼각형
-        { {0.0f, 1.0f, 0.0f}, color, N_LEFT, {0.0f, V_LEFT_MID} },  // Apex(left)
-        { {-1.0f, -1.0f, -1.0f}, color, N_LEFT, {U_LEFT_MID, V2} }, // Top-mid
-        { {-1.0f, -1.0f, 1.0f},  color, N_LEFT, {U_LEFT_MID, V1} }, // Bottom-mid
+        { {0.0f, 1.0f, 0.0f}, color, N_LEFT, {0.0f,V2} },  // Apex(left)
+        { {-1.0f, -1.0f, -1.0f}, color, N_LEFT, {U1, V1} }, // Top-mid
+        { {-1.0f, -1.0f, 1.0f},  color, N_LEFT, {U1, V3} }, // Bottom-mid
 
         // =========================================================================
         // 3. 뒷면 (-Z) - Bottom 삼각형
-        { {0.0f, 1.0f, 0.0f}, color, N_BACK, {U_BOTTOM_MID, 0.0f} }, // Apex(bottom)
-        { {1.0f, -1.0f, -1.0f},  color, N_BACK, {U2, V_BOTTOM_MID} }, // Right-mid
-        { {-1.0f, -1.0f, -1.0f}, color, N_BACK, {U1, V_BOTTOM_MID} }, // Left-mid
+        { {0.0f, 1.0f, 0.0f}, color, N_BACK, {U2, 0.0f} }, // Apex(bottom)
+        { {1.0f, -1.0f, -1.0f},  color, N_BACK, {U1, V1} }, // Right-mid
+        { {-1.0f, -1.0f, -1.0f}, color, N_BACK, {U3, V1} }, // Left-mid
 
         // =========================================================================
         // 4. 오른쪽면 (+X) - Right 삼각형
-        { {0.0f, 1.0f, 0.0f}, color, N_RIGHT, {1.0f, V_RIGHT_MID} }, // Apex(right)
-        { {1.0f, -1.0f, 1.0f},  color, N_RIGHT, {U2, V1} }, // Bottom-mid
-        { {1.0f, -1.0f, -1.0f}, color, N_RIGHT, {U2, V2} }, // Top-mid
+        { {0.0f, 1.0f, 0.0f}, color, N_RIGHT, {1.0f, V2} }, // Apex(right)
+        { {1.0f, -1.0f, 1.0f},  color, N_RIGHT, {U3, V1} }, // Bottom-mid
+        { {1.0f, -1.0f, -1.0f}, color, N_RIGHT, {U3, V3} }, // Top-mid
 
         // =========================================================================
         // 5. 밑면 1 (사각형의 절반)
-        { {1.0f, -1.0f, 1.0f},  color, N_BASE, {U2, V1} },
-        { {-1.0f, -1.0f, 1.0f}, color, N_BASE, {U1, V1} },
-        { {-1.0f, -1.0f, -1.0f},color, N_BASE, {U1, V2} },
+        { {1.0f, -1.0f, 1.0f},  color, N_BASE, {U3, V3} },
+        { {-1.0f, -1.0f, 1.0f}, color, N_BASE, {U1, V3} },
+        { {-1.0f, -1.0f, -1.0f},color, N_BASE, {U1, V1} },
 
         // =========================================================================
         // 6. 밑면 2
-        { {1.0f, -1.0f, 1.0f},  color, N_BASE, {U2, V1} },
-        { {-1.0f, -1.0f, -1.0f},color, N_BASE, {U1, V2} },
-        { {1.0f, -1.0f, -1.0f}, color, N_BASE, {U2, V2} }
+        { {1.0f, -1.0f, 1.0f},  color, N_BASE, {U3, V3} },
+        { {-1.0f, -1.0f, -1.0f},color, N_BASE, {U1, V1} },
+        { {1.0f, -1.0f, -1.0f}, color, N_BASE, {U3, V1} }
     };
 
     return pyramid_vertices;
@@ -366,7 +344,7 @@ public:
     }
 };
 Light light({ 0.0f,5.0f,5.0f }, { 1.0f,1.0f,1.0f });
-Camera camera({ 0.0f,3.0f,3.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
+Camera camera({ 0.0f,5.0f,5.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
 float x = 1, y = 1, z = 1;
 
 float u_1 = 0,u_2 = 0.333333f,u_3 = 0.666666f, u_4 = 1;
@@ -447,6 +425,7 @@ public:
             std::cerr << "ERROR: Failed to load texture: " << filePath << std::endl;
             return;
         }
+        std::cout << filePath << "불러오기 성공!" << std::endl;
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D, id);
 
@@ -513,9 +492,16 @@ Model public_cube({
     create_cube_index()
 ); // 전역 변수로 큐브 모델 생성
 Model pyramidse(create_pyramid(), create_pyramid_index());
+Model screen_quad({
+    // 화면 전체를 덮는 쿼드 생성
+    { {-20.0f, -20.0f, 0.0f}, color, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} }, // 왼쪽 아래
+    { { 20.0f, -20.0f, 0.0f}, color, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} }, // 오른쪽 아래
+    { { 20.0f,  20.0f, 0.0f}, color, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} }, // 오른쪽 위
+    { {-20.0f,  20.0f, 0.0f}, color, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }  // 왼쪽 위
+    },{0, 1, 2,     0, 2, 3});
 Texture player_cube_texture; // 플레이어 1
 Texture pyramid;
-
+Texture screen_texture;
 
 // 게임 오브젝트는 게임 로직을 포함하는 객체임 여기서 다른 자식들로 파생되면서 게임 로직이 추가될 수 있음
 class GameObject { // 게임 오브젝트는 게임 로직을 포함하는 객체임 여기서 다른 자식들로 파생되면서 게임 로직이 추가될 수 있음
@@ -524,6 +510,9 @@ public:
     glm::vec3 velocity = glm::vec3(0.0f); // 속도
     glm::vec3 multy = glm::vec3(1.0f, 1.0f, 1.0f); // 크기 
     glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // 회전 (쿼터니언)
+	float yangle = 0.0f, xangle = 0.0f; // 회전 각도 (오일러 각도)
+	float ange_speed = 0.0f; // 회전 속도
+
     Model* model = nullptr; // 모델 포인터
     Texture* texture = nullptr; // 텍스처 포인터
 
@@ -570,6 +559,18 @@ public:
         // 모델 렌더링
         model->Draw();
     }
+    void Screen_Draw() {
+        if (!model) return;
+        // 텍스처가 있다면 바인딩
+        if (texture) {
+            texture->Bind();
+            // 텍스처 유니폼 위치 설정 (셰이더의 sampler2D 이름: "textureSampler" 가정)
+            GLuint uTex = glGetUniformLocation(shaderProgramID, "textureSampler");
+            glUniform1i(uTex, 0); // GL_TEXTURE0 유닛을 사용하도록 설정
+        }
+        // 모델 렌더링
+        model->Draw();
+    }
 
     virtual void Update(float dt) {}
     virtual void OnCollision(GameObject* other) {}
@@ -577,7 +578,8 @@ public:
     glm::mat4 getModelMatrix() {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, position);
-        model *= glm::mat4_cast(rotation);
+        model *= glm::rotate(model, glm::radians(xangle), { 1,0,0 });
+        model *= glm::rotate(model, glm::radians(yangle), {0,1,0});
         model = glm::scale(model, multy);
         return model;
     }
@@ -601,6 +603,26 @@ public:
         u = glGetUniformLocation(shaderProgramID, "n");
         glUniformMatrix3fv(u, 1, GL_FALSE, glm::value_ptr(normalMatrix));
     }
+    void result_matrix_screen(Camera& camera) {
+        glm::mat4 modelMatrix;
+        glm::mat4 uProj = camera.Projection_matrix_update();
+        glm::mat4 uModel = getModelMatrix();
+        glm::mat4 uView = glm::mat4(1.0f);
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(uModel)));
 
+        GLuint u = glGetUniformLocation(shaderProgramID, "m");
+        glUniformMatrix4fv(u, 1, GL_FALSE, glm::value_ptr(uModel));
+
+        u = glGetUniformLocation(shaderProgramID, "v");
+        glUniformMatrix4fv(u, 1, GL_FALSE, glm::value_ptr(uView));
+
+        u = glGetUniformLocation(shaderProgramID, "p");
+        glUniformMatrix4fv(u, 1, GL_FALSE, glm::value_ptr(uProj));
+
+
+        u = glGetUniformLocation(shaderProgramID, "n");
+        glUniformMatrix3fv(u, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    }
 };
 GameObject player(glm::vec3{0,0,0});
+GameObject screen(glm::vec3(0, 0, -5));

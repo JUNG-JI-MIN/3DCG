@@ -31,19 +31,22 @@ void TimerFunction(int value) {
 
 void onKey(unsigned char key, int x, int y) {
     switch (key) {
-    case 'a':
-        player.addRotation(0, 3, 0);
+    case 'x':
+        player.xangle += 3.0f;
         break;
 
-    case 'd':
-        player.addRotation(0, -3, 0);
+    case 'X':
+        player.xangle += -3.0f;
         break;
-    case 'w':
-        player.addRotation(3, 0, 0);
+
+    case 'y':
+        player.yangle += 3.0f;
         break;
-    case 's':
-        player.addRotation(-3, 0, 0);
+
+    case 'Y':
+        player.yangle += -3.0f;
         break;
+
     case 'p':
         if (player.texture == &pyramid){
             player.texture = &player_cube_texture;
@@ -53,6 +56,14 @@ void onKey(unsigned char key, int x, int y) {
             player.texture = &pyramid;
             player.model = &pyramidse;
         }
+        break;
+        
+    case 'r':
+		player.yangle = 0.0f;
+		player.xangle = 0.0f;
+        player.texture = &player_cube_texture;
+        player.model = &public_cube;
+        break;
     }
 }
 
@@ -70,8 +81,10 @@ void onMouse(int button, int state, int x, int y) {
 void RoadTexture() {
     player_cube_texture.Load("cubecube.png");
     public_cube.Init(); // 전역 변수로 선언된 큐브 모델 초기화
-    pyramid.Load("pyramid's_pury");
+    pyramid.Load("pyramid.png");
     pyramidse.Init();
+	screen_texture.Load("space.png");
+	screen_quad.Init();
 
 }
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
@@ -95,7 +108,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 
     RoadTexture(); // 텍스쳐 로드 함수
     player.InitializeRendering(&public_cube, &player_cube_texture);
-
+	screen.InitializeRendering(&screen_quad, &screen_texture);
 
     light.Init();
 
@@ -118,8 +131,9 @@ GLvoid drawScene() {
     // 깊이 테스트와 뒷면 제거 활성화
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    // 뒷면 제거 설정
     glCullFace(GL_BACK);        // 뒷면을 제거
+    screen.result_matrix_screen(camera);
+	screen.Draw();
 
     player.result_matrix(camera);
     player.Draw();
